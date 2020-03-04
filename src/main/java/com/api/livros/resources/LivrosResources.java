@@ -18,7 +18,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.api.livros.domain.Livro;
-import com.api.livros.repository.LivroRepositiry;
+import com.api.livros.services.LivrosService;
+import com.api.livros.services.exceptions.LivroNaoEncontradoException;
 
 
 @RestController
@@ -26,18 +27,18 @@ import com.api.livros.repository.LivroRepositiry;
 public class LivrosResources {
 	
 	@Autowired
-	private LivroRepositiry RepositoryLivro;
+	private LivrosService serviceLivros;
 	
 	@GetMapping
-	public List<Livro> listar() {
+	public ResponseEntity<List<Livro>> listar() {
 		
-		return RepositoryLivro.findAll() ;
+		return ResponseEntity.status(HttpStatus.OK).body(serviceLivros.listar()) ;
 	}
 	
 	@PostMapping
 	public ResponseEntity<Void> salvar(@RequestBody Livro livro) {
 		
-		livro = RepositoryLivro.save(livro);
+		livro = serviceLivros.salvar(livro);
 		
 		URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(livro.getId()).toUri();
 		
@@ -47,24 +48,41 @@ public class LivrosResources {
 	@GetMapping(value = "/{id}")
 	public ResponseEntity<?> buscar(@PathVariable("id") Long id) {
 		
-		Optional<Livro> livro = RepositoryLivro.findById(id);
+		Optional<Livro> livro = null;
 		
-			if(livro.isEmpty()) {
-				return ResponseEntity.notFound().build();
-			}
+		try {
+			 livro = serviceLivros.buscar(id);
+		} catch (LivroNaoEncontradoException e) {
+			return ResponseEntity.notFound().build();
+		}
+		
+		
 		return ResponseEntity.status(HttpStatus.OK).body(livro);	
 	}
 
 	@DeleteMapping(value = "/{id}")
-	public void deletar(@PathVariable("id") Long id) {
-		RepositoryLivro.deleteById(id);
+	public ResponseEntity<Void> deletar(@PathVariable("id") Long id) {
+		
+		try {
+			serviceLivros.deletar(id);
+		} catch (LivroNaoEncontradoException e) {
+			return ResponseEntity.notFound().build();
+		}
+		return ResponseEntity.noContent().build();
 	}
 	
 	@PutMapping(value = "{/id}")
-	public void editar(@RequestBody Livro livro , @PathVariable Long id) {
+	public ResponseEntity<Void> editar(@RequestBody Livro livro , @PathVariable Long id) {
 		
 		livro.setId(id);
-		RepositoryLivro.save(livro);
+		try {
+			serviceLivros.salvar(livro);
+		} catch (LivroNaoEncontradoException e) {
+			return ResponseEntity.noContent().build(); 
+		}
+		
+		
+		return ResponseEntity.notFound().build();
 	}
 
 	
