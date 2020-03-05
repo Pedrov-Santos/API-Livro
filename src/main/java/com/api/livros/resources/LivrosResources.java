@@ -17,9 +17,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import com.api.livros.domain.Comentario;
 import com.api.livros.domain.Livro;
 import com.api.livros.services.LivrosService;
-import com.api.livros.services.exceptions.LivroNaoEncontradoException;
 
 
 @RestController
@@ -28,6 +28,9 @@ public class LivrosResources {
 	
 	@Autowired
 	private LivrosService serviceLivros;
+	
+	
+	
 	
 	@GetMapping
 	public ResponseEntity<List<Livro>> listar() {
@@ -48,26 +51,14 @@ public class LivrosResources {
 	@GetMapping(value = "/{id}")
 	public ResponseEntity<?> buscar(@PathVariable("id") Long id) {
 		
-		Optional<Livro> livro = null;
-		
-		try {
-			 livro = serviceLivros.buscar(id);
-		} catch (LivroNaoEncontradoException e) {
-			return ResponseEntity.notFound().build();
-		}
-		
-		
+		Optional<Livro> livro = serviceLivros.buscar(id);
 		return ResponseEntity.status(HttpStatus.OK).body(livro);	
 	}
 
 	@DeleteMapping(value = "/{id}")
 	public ResponseEntity<Void> deletar(@PathVariable("id") Long id) {
 		
-		try {
-			serviceLivros.deletar(id);
-		} catch (LivroNaoEncontradoException e) {
-			return ResponseEntity.notFound().build();
-		}
+		serviceLivros.deletar(id);
 		return ResponseEntity.noContent().build();
 	}
 	
@@ -75,16 +66,20 @@ public class LivrosResources {
 	public ResponseEntity<Void> editar(@RequestBody Livro livro , @PathVariable Long id) {
 		
 		livro.setId(id);
-		try {
-			serviceLivros.salvar(livro);
-		} catch (LivroNaoEncontradoException e) {
-			return ResponseEntity.noContent().build(); 
-		}
-		
-		
+		serviceLivros.salvar(livro);
 		return ResponseEntity.notFound().build();
 	}
 
+	
+	@PostMapping(value = "/{id}/comentarios")
+	public ResponseEntity<Void> comentar(@PathVariable("id") Long livroId,@RequestBody Comentario comentario) {
+		
+		serviceLivros.salvarComentario(livroId, comentario);
+		
+		URI uri = ServletUriComponentsBuilder.fromCurrentRequest().build().toUri();
+		
+		return  ResponseEntity.created(uri).build();
+	}
 	
 	
 	
