@@ -8,6 +8,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -37,8 +38,17 @@ public class Livro {
 	@OneToMany(cascade = CascadeType.ALL ,mappedBy = "livro")
 	private List<Comentario> comentarios;
 	
+	@ManyToOne
 	@JsonInclude(Include.NON_NULL)
-	private String autor;
+	private Autor autor;
+
+	public Autor getAutor() {
+		return autor;
+	}
+
+	public void setAutor(Autor autor) {
+		this.autor = autor;
+	}
 
 	public Long getId() {
 		return id;
@@ -88,13 +98,7 @@ public class Livro {
 		this.comentarios = comentarios;
 	}
 
-	public String getAutor() {
-		return autor;
-	}
-
-	public void setAutor(String autor) {
-		this.autor = autor;
-	}
+	
 	
 	
 	

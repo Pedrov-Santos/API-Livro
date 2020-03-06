@@ -17,8 +17,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import com.api.livros.domain.Autor;
 import com.api.livros.domain.Comentario;
 import com.api.livros.domain.Livro;
+import com.api.livros.repository.AutoresRepository;
+import com.api.livros.services.AutorService;
 import com.api.livros.services.LivrosService;
 
 
@@ -29,8 +32,8 @@ public class LivrosResources {
 	@Autowired
 	private LivrosService serviceLivros;
 	
-	
-	
+	@Autowired
+	private AutorService serviceAutor;
 	
 	@GetMapping
 	public ResponseEntity<List<Livro>> listar() {
@@ -81,6 +84,24 @@ public class LivrosResources {
 		return  ResponseEntity.created(uri).build();
 	}
 	
+	@GetMapping(value = "/{id}/comentarios")
+	public ResponseEntity<List<Comentario>> listarComentarios(@PathVariable ("id") Long livroId){
+		
+		List<Comentario> comentarios = serviceLivros.listarComentario(livroId);
+		
+		return ResponseEntity.status(HttpStatus.OK).body(comentarios);
+	}
+	@DeleteMapping(value = "/{id}/comentarios/{id}")
+	public ResponseEntity<Void> deletarComentario(@PathVariable ("id") Long livroId ,@PathVariable("id") Long id) {
+		
+		serviceLivros.deletarComentario(id);
+		return ResponseEntity.noContent().build();
+	}
 	
+	@GetMapping("/autores")
+	public ResponseEntity<List<Autor>> listarAutores() {
+		
+		return ResponseEntity.status(HttpStatus.OK).body(serviceAutor.listarAutor()) ;
+	}
 	
 }

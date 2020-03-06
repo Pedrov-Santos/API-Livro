@@ -71,4 +71,20 @@ public class LivrosService {
 		
 		return RepositoryComentario.save(comentario); 
 	}
+	
+	public List<Comentario> listarComentario(Long livroId){
+		
+		Livro livro = buscar(livroId).get();
+		
+		return livro.getComentarios();
+	}
+	
+	public void deletarComentario(Long id) {
+		try {
+			RepositoryComentario.deleteById(id);
+		} catch (EmptyResultDataAccessException e) {
+			throw new LivroNaoEncontradoException("Livro não encontrado.");
+		}
+		
+	}
 }
